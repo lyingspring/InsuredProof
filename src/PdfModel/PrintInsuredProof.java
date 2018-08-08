@@ -55,14 +55,14 @@ public class PrintInsuredProof {
 	 */
 	public void createPdfFile(Long aac001,String file_url) throws Exception {
 		oracle_jdbc jdbc = new oracle_jdbc();
-		String sql = "select a.aac001," + " aac003," + "aae135," + "sbp_public.f_Get_Codeview('AAC004',aac004) aac004,"
+		String sql = "select to_char(sysdate,'yyyy')||'年'||to_char(sysdate,'mm')||'月'||to_char(sysdate,'dd')||'日' aae036,a.aac001," + " aac003," + "aae135," + "sbp_public.f_Get_Codeview('AAC004',aac004) aac004,"
 				+ " decode(min(decode(b.aae140, '10', aac031, '11', aac031))," + "  '1'," + "  '参保缴费',"
 				+ " '未参保缴费') yl," + " decode(max( decode(b.aae140, '20', c.aac031,0)),'1'," + "  '参保缴费',"
 				+ " '未参保缴费') yb," + " decode(max( decode(b.aae140, '30', c.aac031,0)),'1'," + " '参保缴费',"
 				+ " '未参保缴费') gs," + "   decode(max( decode(b.aae140, '40', c.aac031,0)),'1'," + " '参保缴费',"
 				+ " '未参保缴费') sy," + " decode(max( decode(b.aae140, '50', c.aac031,0)),'1'," + " '参保缴费',"
 				+ " '未参保缴费') shiy" + " from ac01 a, ac02 b, ac20 c where a.aac001 = b.aac001 and a.aac001="
-				+aac001+ " and b.aaz159 = c.aaz159 group by a.aac001, aac003, aae135, aac004";
+				+aac001+ " and b.aaz159 = c.aaz159 group by a.aac001, aac003, aae135, aac004,sysdate";
 
 		List<HashMap<String, String>> listmap = new ArrayList<HashMap<String, String>>();
 		listmap = jdbc.createSQLQuery(sql);//人员基本信息和参保状态
@@ -71,7 +71,7 @@ public class PrintInsuredProof {
 		}
 		
 		sql="select b.aab001 aab001,c.aab004 aab004 from personcollect a,ab01 b,ae10 c "
-				+ "where a.aaz001=b.aaz001 and b.aaz001=c.aaz001 and max_aae003+200>=to_char(sysdate,'yyyymm') and  a.aac001="+aac001;
+				+ "where a.aaz001=b.aaz001 and b.aaz001=c.aaz001 and max_aae003+200>=to_char(sysdate,'yyyymm') and  a.aac001="+aac001+" group by aab001,aab004";
 		List<HashMap<String, String>> listmap2 = new ArrayList<HashMap<String, String>>();
 		jdbc.getConnection();//连接再次开启
 		listmap2 = jdbc.createSQLQuery(sql);//单位变动信息
@@ -664,7 +664,7 @@ public class PrintInsuredProof {
 		doc.add(table);
 
 		Paragraph foot = new Paragraph(
-				"此参保证明打印共 1 页 第 1 页                                                          打印时间：2017年06月15日             ",
+				"此参保证明打印共 1 页 第 1 页                                                          打印时间："+listmap.get(0).get("AAE036")+"             ",
 				conyentFont);
 		foot.setAlignment(Rectangle.ALIGN_RIGHT);// 居右
 		doc.add(foot);

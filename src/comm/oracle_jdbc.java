@@ -2,6 +2,9 @@ package comm;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,7 +12,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 /**
  * 数据库配置及相关方法
  * @author maoxj
@@ -40,13 +45,38 @@ public class oracle_jdbc {
 	public void getConnection() {
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver").newInstance();
-			 String url="jdbc:oracle:thin:@10.134.127.8:1521:casi4";
+			String url="jdbc:oracle:thin:@10.134.126.15:1521/casidb";
 			 //orcl为数据库的SID
 			 String user="casi";
 			 String password="casiyth";
-//			String url = "jdbc:oracle:thin:@127.0.0.1:1521:orcl"; // orcl为数据库的SID
-//			String user = "jyjhk";
-//			String password = "jyjhk";
+			
+			//System.out.println("path:"+this.getClass().getResource("/").toURI().getPath());
+			Properties prop = new Properties();
+			try{
+			//InputStream in = new BufferedInputStream (new FileInputStream(this.getClass().getResource("/").toURI().getPath()+"dbconf.properties"));
+				InputStream in =getClass().getResourceAsStream("/dbconf.properties");
+				prop.load(in); ///加载属性列表
+			Iterator<String> it=prop.stringPropertyNames().iterator();
+			//System.out.println("username"+":"+prop.getProperty("username"));
+			while(it.hasNext()){
+				String key=it.next();
+				if(key.equals("username")){
+					user=prop.getProperty(key);
+				}
+				if(key.equals("psw")){
+					password=prop.getProperty(key);
+				}
+				if(key.equals("oracle_url")){
+					url=prop.getProperty(key);
+				}
+				System.out.println(key+":"+prop.getProperty(key));
+			}
+			in.close();
+			}catch(Exception e){
+				System.out.println(e);
+			}
+			
+
 			conn = DriverManager.getConnection(url, user, password);
 		} catch (Exception e) {
 			System.out.println("jdbc: 数据库连接失败！请查看数据库配置！");
